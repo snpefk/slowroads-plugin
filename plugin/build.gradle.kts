@@ -21,7 +21,7 @@ pluginBundle {
 
 gradlePlugin {
     plugins.create("slowroads") {
-        id = "slowroads-plugin"
+        id = "io.github.snpefk.slowroads-plugin"
         displayName = "SlowRoads Plugin"
         description = "The worst thing you can add to your build"
         implementationClass = "io.github.snpefk.SlowRoadsPlugin"
