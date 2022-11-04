@@ -1,8 +1,7 @@
 plugins {
     `java-gradle-plugin`
-    `maven-publish`
     id("org.jetbrains.kotlin.jvm") version "1.6.21"
-    id("slowroads-plugin") version "1.0"
+    id("com.gradle.plugin-publish") version "1.0.0"
 }
 
 group = "io.github.snpefk"
@@ -12,6 +11,12 @@ dependencies {
     implementation(platform("org.jetbrains.kotlin:kotlin-bom"))
 
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
+}
+
+pluginBundle {
+    website = "https://snpefk.github.io"
+    vcsUrl = "https://github.com/snpefk/slowroads-plugin"
+    tags = listOf("cringe", "jokes", "games")
 }
 
 gradlePlugin {
