@@ -16,7 +16,7 @@ dependencies {
 pluginBundle {
     website = "https://github.com/snpefk/slowroads-plugin#readme"
     vcsUrl = "https://github.com/snpefk/slowroads-plugin"
-    tags = listOf("fun", "toy", "easter-egg", "build", "gradle")
+    tags = listOf("fun", "build", "game")
 }
 
 gradlePlugin {
