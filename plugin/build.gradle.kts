@@ -14,16 +14,16 @@ dependencies {
 }
 
 pluginBundle {
-    website = "https://snpefk.github.io"
+    website = "https://github.com/snpefk/slowroads-plugin#readme"
     vcsUrl = "https://github.com/snpefk/slowroads-plugin"
-    tags = listOf("cringe", "jokes", "games")
+    tags = listOf("fun", "toy", "easter-egg", "build", "gradle")
 }
 
 gradlePlugin {
     plugins.create("slowroads") {
         id = "io.github.snpefk.slowroads-plugin"
         displayName = "SlowRoads Plugin"
-        description = "The worst thing you can add to your build"
+        description = "A harmless toy plugin that starts Slow Roads game in your browser while your gradle build is running."
         implementationClass = "io.github.snpefk.SlowRoadsPlugin"
     }
 }
