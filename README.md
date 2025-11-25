@@ -21,3 +21,11 @@ plugins {
     id("io.github.snpefk.slowroads-plugin") version "1.0" 
 }
 ```
+
+## How to test 
+
+Run the sample project 
+
+```bash
+./gradlew -p samples/simple dummy
+``` 
