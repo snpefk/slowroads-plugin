@@ -4,23 +4,21 @@ import java.io.IOException
 import java.util.Locale
 import org.gradle.api.Plugin
 import org.gradle.api.Project
-import org.slf4j.LoggerFactory
+import org.gradle.api.logging.Logging
+import org.gradle.api.services.BuildService
+import org.gradle.api.services.BuildServiceParameters
+import org.gradle.api.services.BuildServiceRegistry
 
-class SlowRoadsPlugin : Plugin<Project> {
+class SlowRoad {
+
+    private var runningGame: Process? = null
+    private val logger = Logging.getLogger("SlowRoad")
 
     companion object {
         private const val SLOW_ROADS_URL = "https://slowroads.io"
     }
 
-    private var runningGame: Process? = null
-    private val logger = LoggerFactory.getLogger(this::class.java)
-
-    override fun apply(project: Project) {
-        project.afterEvaluate { start() }
-        project.gradle.buildFinished { stop() }
-    }
-
-    private fun start() {
+    fun start() {
         val os = System.getProperty("os.name").lowercase(Locale.getDefault())
 
         runningGame = when {
@@ -28,17 +26,18 @@ class SlowRoadsPlugin : Plugin<Project> {
             "win" in os -> onWin()
             "mac" in os -> onMac()
             else -> {
-                logger.warn("Unsupported OS: $os")
+                logger.error("Unsupported OS: $os")
                 null
             }
         }
     }
 
-    private fun stop() {
+    fun stop() {
+        logger.info("Stopping SlowRoads, let's get back to work")
         runningGame?.destroy()
     }
 
-    private fun onLinux(): Process? {
+    fun onLinux(): Process? {
         val runtime = Runtime.getRuntime()
 
         val browsers = listOf("google-chrome --new-window", "chromium --new-window", "firefox --new-window")
@@ -46,32 +45,67 @@ class SlowRoadsPlugin : Plugin<Project> {
             try {
                 return runtime.exec("$browser $SLOW_ROADS_URL")
             } catch (e: IOException) {
-                logger.info("Tried $browser; Didn't work")
+                logger.warn("Can't start SlowRoad in $browser: $e")
             }
         }
-        logger.warn("Tried all browsers. None worked")
+
+        logger.error("The system doesn't have installed supported browsers to run SlowRoad")
         return null
     }
 
-    private fun onWin(): Process? {
+    fun onWin(): Process? {
         val runtime = Runtime.getRuntime()
 
         return try {
             runtime.exec("rundll32 url.dll,FileProtocolHandler $SLOW_ROADS_URL")
         } catch (e: IOException) {
-            logger.warn("Failed to start on Win")
+            logger.error("Error while starting on Win: $e")
             null
         }
     }
 
-    private fun onMac(): Process? {
+    fun onMac(): Process? {
         val runtime = Runtime.getRuntime()
 
         return try {
             runtime.exec("open $SLOW_ROADS_URL")
         } catch (e: IOException) {
-            logger.warn("Tried to start on Mac")
+            logger.error("Error while starting on Mac: $e")
             null
+        }
+    }
+}
+
+abstract class BuildLifecycleService :
+    BuildService<BuildLifecycleService.Params>,
+    AutoCloseable {
+
+    interface Params : BuildServiceParameters
+
+    private val slowRoad = SlowRoad()
+
+    init {
+        slowRoad.start()
+    }
+
+    override fun close() {
+        slowRoad.stop()
+    }
+}
+
+class SlowRoadsPlugin : Plugin<Project> {
+    override fun apply(project: Project) {
+        val gradle = project.gradle
+        val sharedServices: BuildServiceRegistry = gradle.sharedServices
+
+        val serviceProvider = sharedServices.registerIfAbsent(
+            "buildLifecycleServiceSlowRoad",
+            BuildLifecycleService::class.java,
+            {}
+        )
+
+        gradle.taskGraph.whenReady {
+            serviceProvider.get()
         }
     }
 }
