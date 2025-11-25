@@ -68,7 +68,7 @@ class SlowRoad {
         val runtime = Runtime.getRuntime()
 
         return try {
-            runtime.exec("open $SLOW_ROADS_URL")
+            runtime.exec("open -n $SLOW_ROADS_URL")
         } catch (e: IOException) {
             logger.error("Error while starting on Mac: $e")
             null
